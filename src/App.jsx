@@ -10,10 +10,14 @@ import { SiteHeader } from '@/components/site-header';
 import Navbar from '@/components/Navbar';
 import Home from '@/pages/Home';
 
-import FestivalsIndex from '@/pages/festivals/Index';
-import FestivalsShow from '@/pages/festivals/Show';
-import FestivalsCreate from '@/pages/festivals/Create';
-import FestivalsEdit from '@/pages/festivals/Edit';
+import PatientsIndex from '@/pages/patients/Index';
+import PatientsShow from '@/pages/patients/Show';
+
+import DoctorsIndex from '@/pages/doctors/Index';
+import DoctorsShow from '@/pages/doctors/Show';
+
+import AppointmentsIndex from '@/pages/appointments/Index';
+import AppointmentsShow from '@/pages/appointments/Show';
 
 
 export default function App() {
@@ -42,16 +46,23 @@ export default function App() {
                     element={<Home />}
                   />
 
-                  <Route path="/festivals" element={<FestivalsIndex />} />
+                  <Route path="/patients" element={<PatientsIndex />} />
                   <Route
-                    path="/festivals/:id"
-                    element={<FestivalsShow />}
+                    path="/patients/:id"
+                    element={<PatientsShow />}
                   />
+
+                  <Route path="/doctors" element={<DoctorsIndex />} />
                   <Route
-                    path="/festivals/:id/edit"
-                    element={<FestivalsEdit />}
+                    path="/doctors/:id"
+                    element={<DoctorsShow />}
                   />
-                  <Route path="/festivals/create" element={<FestivalsCreate />} />
+
+                  <Route path="/appointments" element={<AppointmentsIndex />} />
+                  <Route
+                    path="/appointments/:id"
+                    element={<AppointmentsShow />}
+                  />
                 </Routes>
               </div>
             </div>

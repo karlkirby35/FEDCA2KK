@@ -13,15 +13,17 @@ import {
 } from "@/components/ui/card";
 
 export default function Show() {
-  const [festival, setFestival] = useState([]);
+  const [patient, setPatient] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { id } = useParams();
   const { token } = useAuth();
 
   useEffect(() => {
-    const fetchFestival = async () => {
+    const fetchPatient = async () => {
       const options = {
         method: "GET",
-        url: `/festivals/${id}`,
+        url: `/patients/${id}`,
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -30,25 +32,37 @@ export default function Show() {
       try {
         let response = await axios.request(options);
         console.log(response.data);
-        setFestival(response.data);
+        setPatient(response.data);
       } catch (err) {
         console.log(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchFestival();
-  }, []);
+    fetchPatient();
+  }, [id, token]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!patient) return <div>No patient found</div>;
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>{festival.title}</CardTitle>
+        <CardTitle>{patient.first_name} {patient.last_name}</CardTitle>
         <CardDescription>
-          {festival.description}
+          Patient ID: {patient.id}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <img src={festival.image_path} alt={festival.title} />
+        <div className="space-y-2">
+          <p><strong>Email:</strong> {patient.email}</p>
+          <p><strong>Phone:</strong> {patient.phone}</p>
+          <p><strong>Date of Birth:</strong> {patient.date_of_birth}</p>
+          <p><strong>Medical Record Number:</strong> {patient.medical_record_number}</p>
+        </div>
       </CardContent>
       <CardFooter className="flex-col gap-2">
       </CardFooter>

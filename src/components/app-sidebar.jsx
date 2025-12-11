@@ -37,8 +37,8 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Festivals",
-      url: "/festivals",
+      title: "Patients",
+      url: "/patients",
       icon: IconConfetti,
     },
     {
