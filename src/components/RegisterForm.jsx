@@ -104,7 +104,7 @@ export default function RegisterForm() {
       </CardContent>
       <CardFooter className="flex-col gap-2">
         <Button variant="outline" onClick={submitForm} className="w-full">
-          Register
+          Registers
         </Button>
       </CardFooter>
     </Card>
