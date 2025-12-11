@@ -1,11 +1,11 @@
 import * as React from "react";
 import {
-  IconConfetti,
-  IconTheater,
+  IconUsers,
+  IconStethoscope,
   IconDashboard,
-  IconMicrophone2,
+  IconCalendarCheck,
   IconInnerShadowTop,
-  IconMusic,
+  IconPill,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -39,22 +39,22 @@ const data = {
     {
       title: "Patients",
       url: "/patients",
-      icon: IconConfetti,
+      icon: IconUsers,
     },
     {
-      title: "Stages",
-      url: "#",
-      icon: IconTheater,
+      title: "Doctors",
+      url: "/doctors",
+      icon: IconStethoscope,
     },
     {
-      title: "Performers",
-      url: "#",
-      icon: IconMicrophone2,
+      title: "Appointments",
+      url: "/appointments",
+      icon: IconCalendarCheck,
     },
     {
-      title: "Shows",
-      url: "#",
-      icon: IconMusic,
+      title: "Prescriptions",
+      url: "/prescriptions",
+      icon: IconPill,
     },
   ],
 };
