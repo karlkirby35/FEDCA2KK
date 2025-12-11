@@ -27,7 +27,6 @@ export default function RegisterForm() {
       return;
     }
 
-    // Send all required fields to your API
     onRegister({
       first_name: form.first_name,
       last_name: form.last_name,
