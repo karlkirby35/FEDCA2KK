@@ -13,6 +13,7 @@ import Home from '@/pages/Home';
 import PatientsIndex from '@/pages/patients/Index';
 import PatientsShow from '@/pages/patients/Show';
 import PatientsCreate from '@/pages/patients/Create';
+import PatientsEdit from '@/pages/patients/Edit';
 
 import DoctorsIndex from '@/pages/doctors/Index';
 import DoctorsShow from '@/pages/doctors/Show';
@@ -59,6 +60,7 @@ export default function App() {
   element={<ProtectedRoute><PatientsIndex /></ProtectedRoute>} 
 />
                   <Route path="/patients/create" element={<ProtectedRoute><PatientsCreate /></ProtectedRoute>} />
+                  <Route path="/patients/:id/edit" element={<ProtectedRoute><PatientsEdit /></ProtectedRoute>} />
                   <Route
                     path="/patients/:id"
                     element={<ProtectedRoute><PatientsShow /></ProtectedRoute>}
