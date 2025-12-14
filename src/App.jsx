@@ -15,9 +15,11 @@ import PatientsShow from '@/pages/patients/Show';
 
 import DoctorsIndex from '@/pages/doctors/Index';
 import DoctorsShow from '@/pages/doctors/Show';
+import DoctorsCreate from '@/pages/doctors/Create';
 
 import AppointmentsIndex from '@/pages/appointments/Index';
 import AppointmentsShow from '@/pages/appointments/Show';
+import AppointmentsCreate from '@/pages/appointments/Create';
 
 import PrescriptionsIndex from '@/pages/prescriptions/Index';
 import PrescriptionsShow from '@/pages/prescriptions/Show';
@@ -56,12 +58,14 @@ export default function App() {
                   />
 
                   <Route path="/doctors" element={<DoctorsIndex />} />
+                  <Route path="/doctors/create" element={<DoctorsCreate />} />
                   <Route
                     path="/doctors/:id"
                     element={<DoctorsShow />}
                   />
 
                   <Route path="/appointments" element={<AppointmentsIndex />} />
+                  <Route path="/appointments/create" element={<AppointmentsCreate />} />
                   <Route
                     path="/appointments/:id"
                     element={<AppointmentsShow />}

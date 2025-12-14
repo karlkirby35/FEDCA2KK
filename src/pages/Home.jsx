@@ -6,7 +6,7 @@ export default function Home() {
     const { token } = useAuth();
     return (
         <>
-            <h1>This is Home</h1>
+            <h1 class ="title">Total patient count:</h1>
             
             {!token && <LoginForm />}
              {!token && <RegisterForm />}
