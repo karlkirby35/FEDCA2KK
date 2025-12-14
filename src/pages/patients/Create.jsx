@@ -12,6 +12,7 @@ export default function Create() {
         last_name: "",
         email: "",
         phone: "",
+        address: "",
         date_of_birth: "",
         medical_record_number: "",
     });
@@ -37,21 +38,27 @@ export default function Create() {
             toast.success('Patient created successfully');
             navigate('/patients', { state: { type: 'success', message: `Patient "${response.data.first_name} ${response.data.last_name}" created` } });
         } catch (err) {
-            console.error(err);
+            console.error("Full error:", err);
+            console.error("Error response:", err.response?.data);
             // show validation errors if available
             if (err.response && err.response.data) {
-                // API may return errors as object or array
                 const data = err.response.data;
-                if (typeof data === 'string') toast.error(data);
-                else if (Array.isArray(data)) toast.error(data.join(', '));
-                else if (data.errors) {
+                if (data.error?.issues) {
+                    // Zod validation errors
+                    const msgs = data.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join('\n');
+                    toast.error(msgs);
+                } else if (typeof data === 'string') {
+                    toast.error(data);
+                } else if (Array.isArray(data)) {
+                    toast.error(data.join(', '));
+                } else if (data.errors) {
                     // Laravel-like validation: { errors: { field: [msg] } }
-                    const msgs = Object.values(data.errors).flat().join(' - ');
+                    const msgs = Object.entries(data.errors).map(([field, msgs]) => `${field}: ${msgs.join(', ')}`).join('\n');
                     toast.error(msgs);
                 } else if (data.message) {
                     toast.error(data.message);
                 } else {
-                    toast.error('Validation failed');
+                    toast.error(JSON.stringify(data));
                 }
             } else {
                 toast.error(err.message || 'Request failed');
@@ -93,10 +100,18 @@ export default function Create() {
             />
             <Input 
                 type="text" 
-                placeholder="Phone" 
+                placeholder="Phone (min 10 characters)" 
                 name="phone" 
                 value={form.phone} 
-                onChange={handleChange} 
+                onChange={handleChange}
+                minLength="10"
+            />
+            <Input 
+                type="text" 
+                placeholder="Address" 
+                name="address" 
+                value={form.address} 
+                onChange={handleChange}
             />
             <Input 
                 type="date" 

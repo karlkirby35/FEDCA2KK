@@ -12,6 +12,7 @@ import Home from '@/pages/Home';
 
 import PatientsIndex from '@/pages/patients/Index';
 import PatientsShow from '@/pages/patients/Show';
+import PatientsCreate from '@/pages/patients/Create';
 
 import DoctorsIndex from '@/pages/doctors/Index';
 import DoctorsShow from '@/pages/doctors/Show';
@@ -52,6 +53,7 @@ export default function App() {
                   />
 
                   <Route path="/patients" element={<PatientsIndex />} />
+                  <Route path="/patients/create" element={<PatientsCreate />} />
                   <Route
                     path="/patients/:id"
                     element={<PatientsShow />}
