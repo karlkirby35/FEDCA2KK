@@ -26,6 +26,8 @@ import PrescriptionsIndex from '@/pages/prescriptions/Index';
 import PrescriptionsShow from '@/pages/prescriptions/Show';
 import PrescriptionsCreate from '@/pages/prescriptions/Create';
 
+import ProtectedRoute from '@/components/ProtectedRoute';
+
 export default function App() {
 
   return (
@@ -52,32 +54,35 @@ export default function App() {
                     element={<Home />}
                   />
 
-                  <Route path="/patients" element={<PatientsIndex />} />
-                  <Route path="/patients/create" element={<PatientsCreate />} />
+<Route 
+  path="/patients" 
+  element={<ProtectedRoute><PatientsIndex /></ProtectedRoute>} 
+/>
+                  <Route path="/patients/create" element={<ProtectedRoute><PatientsCreate /></ProtectedRoute>} />
                   <Route
                     path="/patients/:id"
-                    element={<PatientsShow />}
+                    element={<ProtectedRoute><PatientsShow /></ProtectedRoute>}
                   />
 
-                  <Route path="/doctors" element={<DoctorsIndex />} />
-                  <Route path="/doctors/create" element={<DoctorsCreate />} />
+                  <Route path="/doctors" element={<ProtectedRoute><DoctorsIndex /></ProtectedRoute>} />
+                  <Route path="/doctors/create" element={<ProtectedRoute><DoctorsCreate /></ProtectedRoute>} />
                   <Route
                     path="/doctors/:id"
-                    element={<DoctorsShow />}
+                    element={<ProtectedRoute><DoctorsShow /></ProtectedRoute>}
                   />
 
-                  <Route path="/appointments" element={<AppointmentsIndex />} />
-                  <Route path="/appointments/create" element={<AppointmentsCreate />} />
+                  <Route path="/appointments" element={<ProtectedRoute><AppointmentsIndex /></ProtectedRoute>} />
+                  <Route path="/appointments/create" element={<ProtectedRoute><AppointmentsCreate /></ProtectedRoute>} />
                   <Route
                     path="/appointments/:id"
-                    element={<AppointmentsShow />}
+                    element={<ProtectedRoute><AppointmentsShow /></ProtectedRoute>}
                   />
 
-                  <Route path="/prescriptions" element={<PrescriptionsIndex />} />
-                  <Route path="/prescriptions/create" element={<PrescriptionsCreate />} />
+                  <Route path="/prescriptions" element={<ProtectedRoute><PrescriptionsIndex /></ProtectedRoute>} />
+                  <Route path="/prescriptions/create" element={<ProtectedRoute><PrescriptionsCreate /></ProtectedRoute>} />
                   <Route
                     path="/prescriptions/:id"
-                    element={<PrescriptionsShow />}
+                    element={<ProtectedRoute><PrescriptionsShow /></ProtectedRoute>}
                   />
                 </Routes>
               </div>
