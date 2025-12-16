@@ -51,7 +51,15 @@ export default function Show() {
   if (!patient) return <div>No patient found</div>;
 
   return (
+    <>
+        <Button 
+          variant="outline"
+          onClick={() => navigate('/patients')}
+          className="w-fit"
+        >Back to Patients</Button>
+    
     <Card className="w-full max-w-md">
+      
       <CardHeader>
         <CardTitle>{patient.first_name} {patient.last_name}</CardTitle>
         <CardDescription>
@@ -66,13 +74,11 @@ export default function Show() {
           <p><strong>Medical Record Number:</strong> {patient.medical_record_number}</p>
         </div>
       </CardContent>
-        <Button 
-          variant="outline"
-          onClick={() => navigate('/patients')}
-          className="w-full"
-        >Back to Patients</Button>
+      
       <CardFooter className="flex-col gap-2">
       </CardFooter>
-    </Card>
+      
+    </Card>  
+    </>
   );
 }

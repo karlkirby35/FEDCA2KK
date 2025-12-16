@@ -21,14 +21,17 @@ export default function DoctorShow() {
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
+        console.log("Fetching doctor with ID:", id);
         const response = await axios.get(`/doctors/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log("Doctor data:", response.data);
         setDoctor(response.data);
       } catch (err) {
-        console.error(err);
+        console.error("Full error:", err);
+        console.error("Response data:", err.response?.data);
         setError(err.message);
       } finally {
         setLoading(false);
