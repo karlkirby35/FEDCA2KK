@@ -59,14 +59,14 @@ export default function DoctorShow() {
       <CardHeader>
         <CardTitle>{doctor.first_name} {doctor.last_name}</CardTitle>
         <CardDescription>
-          {doctor.specialization}
+          {doctor.specialisation}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           <p><strong>Email:</strong> {doctor.email}</p>
           <p><strong>Phone:</strong> {doctor.phone}</p>
-          <p><strong>License Number:</strong> {doctor.license_number}</p>
+          <p><strong>License Number:</strong> {doctor.licence_number}</p>
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-2">

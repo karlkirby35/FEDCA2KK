@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "@/config/api";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,6 +18,7 @@ export default function PrescriptionShow() {
   const [error, setError] = useState(null);
   const { id } = useParams();
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPrescription = async () => {
@@ -43,13 +45,19 @@ export default function PrescriptionShow() {
   if (!prescription) return <div>No prescription found</div>;
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>Prescription #{prescription.id}</CardTitle>
-        <CardDescription>
-          Status: {prescription.status}
-        </CardDescription>
-      </CardHeader>
+    <>
+      <Button 
+          variant="outline"
+          onClick={() => navigate('/prescriptions')}
+          className="w-fit mb-4"
+        >← Back</Button>
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle>Prescription #{prescription.id}</CardTitle>
+          <CardDescription>
+            Status: {prescription.status}
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -96,8 +104,9 @@ export default function PrescriptionShow() {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex-col gap-2">
-      </CardFooter>
-    </Card>
+        <CardFooter className="flex-col gap-2">
+        </CardFooter>
+      </Card>
+    </>
   );
 }

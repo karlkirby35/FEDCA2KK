@@ -106,6 +106,11 @@ export default function Create() {
 
   return (
     <>
+        <Button 
+            variant="outline" 
+            className="mb-4 w-fit"
+            onClick={() => navigate('/prescriptions')}
+        >← Back</Button>
         <h1 className="text-2xl font-semibold mb-4">Create Prescription</h1>
         <form onSubmit={handleSubmit} className="space-y-3 max-w-2xl">
             

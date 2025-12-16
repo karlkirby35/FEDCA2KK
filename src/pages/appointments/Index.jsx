@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "@/config/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -43,7 +44,10 @@ export default function AppointmentsIndex() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Appointments</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Appointments</h1>
+        <Button onClick={() => navigate('/appointments/create')}>Create Appointment</Button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>

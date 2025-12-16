@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "@/config/api";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,22 +14,41 @@ import {
 
 export default function AppointmentShow() {
   const [appointment, setAppointment] = useState(null);
+  const [patient, setPatient] = useState(null);
+  const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAppointment = async () => {
       try {
-        const response = await axios.get(`/appointments/${id}`, {
+        const appointmentRes = await axios.get(`/appointments/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setAppointment(response.data);
+        console.log("Appointment data:", appointmentRes.data);
+        setAppointment(appointmentRes.data);
+
+        // Fetch patient and doctor data separately
+        if (appointmentRes.data.patient_id && appointmentRes.data.doctor_id) {
+          const [patientRes, doctorRes] = await Promise.all([
+            axios.get(`/patients/${appointmentRes.data.patient_id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            }),
+            axios.get(`/doctors/${appointmentRes.data.doctor_id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            })
+          ]);
+          setPatient(patientRes.data);
+          setDoctor(doctorRes.data);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Full error:", err);
+        console.error("Response data:", err.response?.data);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -43,13 +63,19 @@ export default function AppointmentShow() {
   if (!appointment) return <div>No appointment found</div>;
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Appointment #{appointment.id}</CardTitle>
-        <CardDescription>
-          {appointment.status}
-        </CardDescription>
-      </CardHeader>
+    <>
+      <Button 
+          variant="outline"
+          onClick={() => navigate('/appointments')}
+          className="w-fit mb-4"
+        >← Back</Button>
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Appointment #{appointment.id}</CardTitle>
+          <CardDescription>
+            {appointment.status}
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <div className="space-y-2">
           <p><strong>Patient:</strong> {appointment.patient?.first_name} {appointment.patient?.last_name}</p>
@@ -63,5 +89,6 @@ export default function AppointmentShow() {
       <CardFooter className="flex-col gap-2">
       </CardFooter>
     </Card>
+    </>
   );
 }

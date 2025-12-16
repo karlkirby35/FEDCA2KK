@@ -64,7 +64,7 @@ export default function DoctorsIndex() {
             <TableRow key={doctor.id}>
               <TableCell>{doctor.id}</TableCell>
               <TableCell>{doctor.first_name} {doctor.last_name}</TableCell>
-              <TableCell>{doctor.specialization}</TableCell>
+              <TableCell>{doctor.specialisation}</TableCell>
               <TableCell>{doctor.email}</TableCell>
               <TableCell>{doctor.phone}</TableCell>
               <TableCell>
