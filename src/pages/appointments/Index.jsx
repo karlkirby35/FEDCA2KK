@@ -32,11 +32,13 @@ export default function AppointmentsIndex() {
           axios.get(`/patients/${appt.patient_id}`, { headers: { Authorization: `Bearer ${token}` }}),
           axios.get(`/doctors/${appt.doctor_id}`, { headers: { Authorization: `Bearer ${token}` }})
         ]);
-        return {
+        const enrichedAppt = {
           ...appt,
           patient: patientRes.data,
           doctor: doctorRes.data
         };
+        console.log('Appointment data:', enrichedAppt);
+        return enrichedAppt;
       })
     );
 
@@ -71,20 +73,28 @@ export default function AppointmentsIndex() {
             <TableHead>Patient</TableHead>
             <TableHead>Doctor</TableHead>
             <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {appointments.map((appointment) => (
+          {appointments.map((appointment) => {
+            // Convert timestamp to date string
+            let appointmentDate = 'N/A';
+            if (appointment.appointment_date) {
+              let timestamp = parseInt(appointment.appointment_date);
+              if (timestamp < 10000000000) {
+                timestamp = timestamp * 1000;
+              }
+              const date = new Date(timestamp);
+              appointmentDate = date.toISOString().split('T')[0];
+            }
+            
+            return (
             <TableRow key={appointment.id}>
               <TableCell>{appointment.id}</TableCell>
               <TableCell>{appointment.patient?.first_name} {appointment.patient?.last_name}</TableCell>
               <TableCell>{appointment.doctor?.first_name} {appointment.doctor?.last_name}</TableCell>
-              <TableCell>{appointment.appointment_date}</TableCell>
-              <TableCell>{appointment.appointment_time}</TableCell>
-              <TableCell>{appointment.status}</TableCell>
+              <TableCell>{appointmentDate}</TableCell>
               <TableCell>
                 <button
                   onClick={() => navigate(`/appointments/${appointment.id}`)}
@@ -94,7 +104,8 @@ export default function AppointmentsIndex() {
                 </button>
               </TableCell>
             </TableRow>
-          ))}
+          );
+          })}
         </TableBody>
       </Table>
     </div>
