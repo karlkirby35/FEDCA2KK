@@ -63,33 +63,30 @@ export default function Create() {
     };
 
     const createAppointment = async () => {
-        setSubmitting(true);
-        try {
-            const response = await axios.post('/appointments', form, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            toast.success('Appointment created successfully');
-            navigate('/appointments', { state: { type: 'success', message: 'Appointment created' } });
-        } catch (err) {
-            console.error(err);
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.message) toast.error(data.message);
-                else if (data.errors) {
-                    const msgs = Object.values(data.errors).flat().join(' - ');
-                    toast.error(msgs);
-                } else {
-                    toast.error('Validation failed');
-                }
-            } else {
-                toast.error(err.message || 'Request failed');
-            }
-        } finally {
-            setSubmitting(false);
-        }
-    };
+  setSubmitting(true);
+
+  const payload = {
+    ...form,
+    patient_id: Number(form.patient_id),
+    doctor_id: Number(form.doctor_id),
+  };
+
+  try {
+    await axios.post('/appointments', payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    toast.success('Appointment created successfully');
+    navigate('/appointments');
+  } catch (err) {
+    console.error(err.response?.data);
+    toast.error('Validation failed');
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
     const handleSubmit = (e) => {
         e.preventDefault();

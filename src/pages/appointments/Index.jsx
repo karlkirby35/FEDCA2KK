@@ -21,20 +21,34 @@ export default function AppointmentsIndex() {
 
   useEffect(() => {
     const fetchAppointments = async () => {
-      try {
-        const response = await axios.get("/appointments", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setAppointments(response.data);
-      } catch (err) {
-        console.error(err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  try {
+    const res = await axios.get("/appointments", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const appointmentsWithData = await Promise.all(
+      res.data.map(async (appt) => {
+        const [patientRes, doctorRes] = await Promise.all([
+          axios.get(`/patients/${appt.patient_id}`, { headers: { Authorization: `Bearer ${token}` }}),
+          axios.get(`/doctors/${appt.doctor_id}`, { headers: { Authorization: `Bearer ${token}` }})
+        ]);
+        return {
+          ...appt,
+          patient: patientRes.data,
+          doctor: doctorRes.data
+        };
+      })
+    );
+
+    setAppointments(appointmentsWithData);
+  } catch (err) {
+    console.error(err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     fetchAppointments();
   }, [token]);

@@ -15,7 +15,7 @@ import {
 export default function AppointmentShow() {
   const [appointment, setAppointment] = useState(null);
   const [patient, setPatient] = useState(null);
-  const [doctor, setDoctor] = useState(null);
+const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
@@ -77,15 +77,25 @@ export default function AppointmentShow() {
           </CardDescription>
         </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <p><strong>Patient:</strong> {appointment.patient?.first_name} {appointment.patient?.last_name}</p>
-          <p><strong>Doctor:</strong> {appointment.doctor?.first_name} {appointment.doctor?.last_name}</p>
-          <p><strong>Date:</strong> {appointment.appointment_date}</p>
-          <p><strong>Time:</strong> {appointment.appointment_time}</p>
-          <p><strong>Reason:</strong> {appointment.reason}</p>
-          <p><strong>Notes:</strong> {appointment.notes}</p>
-        </div>
-      </CardContent>
+  <div className="space-y-2">
+    <p>
+      <strong>Patient:</strong>{" "}
+      {patient ? `${patient.first_name} ${patient.last_name}` : "—"}
+    </p>
+
+    <p>
+      <strong>Doctor:</strong>{" "}
+      {doctor ? `${doctor.first_name} ${doctor.last_name}` : "—"}
+    </p>
+
+    <p><strong>Status:</strong> {appointment.status}</p>
+    <p><strong>Date:</strong> {appointment.appointment_date}</p>
+    <p><strong>Time:</strong> {appointment.appointment_time}</p>
+    <p><strong>Reason:</strong> {appointment.reason}</p>
+    <p><strong>Notes:</strong> {appointment.notes}</p>
+  </div>
+</CardContent>
+
       <CardFooter className="flex-col gap-2">
       </CardFooter>
     </Card>
