@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "@/config/api";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Eye, Pencil } from "lucide-react";
 import DeleteBtn from "@/components/DeleteBtn";
@@ -30,6 +30,7 @@ export default function Index() {
   const [patients, setPatients] = useState([]);
 
   const navigate = useNavigate();
+  const location = useLocation();
   
 
   useEffect(() => {
@@ -49,7 +50,12 @@ export default function Index() {
     };
 
     fetchPatients();
-  }, []);
+    
+    // Show success message if navigated from create/edit
+    if (location.state?.message) {
+      toast.success(location.state.message);
+    }
+  }, [location.state]);
 
   const onDeleteCallback = (id) => {
     toast.success("Patient deleted successfully");

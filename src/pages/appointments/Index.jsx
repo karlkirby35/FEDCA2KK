@@ -40,6 +40,8 @@ export default function AppointmentsIndex() {
       })
     );
 
+    
+
     setAppointments(appointmentsWithData);
   } catch (err) {
     console.error(err);

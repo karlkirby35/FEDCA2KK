@@ -35,6 +35,7 @@ export default function Create() {
                     Authorization: `Bearer ${token}`
                 }
             });
+            console.log('Patient created:', response.data);
             toast.success('Patient created successfully');
             navigate('/patients', { state: { type: 'success', message: `Patient "${response.data.first_name} ${response.data.last_name}" created` } });
         } catch (err) {

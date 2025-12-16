@@ -19,8 +19,8 @@ export default function Create() {
         last_name: "",
         email: "",
         phone: "",
-        specialization: "",
-        license_number: "",
+        specialisation: "",
+        licence_number: "",
     });
     const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
@@ -33,34 +33,60 @@ export default function Create() {
         });
     };
 
-    const createDoctor = async () => {
-        setSubmitting(true);
-        try {
-            const response = await axios.post('/doctors', form, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            toast.success('Doctor created successfully');
-            navigate('/doctors', { state: { type: 'success', message: `Doctor "${response.data.first_name} ${response.data.last_name}" created` } });
-        } catch (err) {
-            console.error(err);
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.message) toast.error(data.message);
-                else if (data.errors) {
-                    const msgs = Object.values(data.errors).flat().join(' - ');
-                    toast.error(msgs);
-                } else {
-                    toast.error('Validation failed');
-                }
-            } else {
-                toast.error(err.message || 'Request failed');
-            }
-        } finally {
-            setSubmitting(false);
-        }
+    const handleSelectChange = (value) => {
+        setForm({
+            ...form,
+            specialisation: value
+        });
     };
+
+   const createDoctor = async () => {
+  setSubmitting(true);
+  try {
+    const payload = {
+      first_name: form.first_name.trim(),
+      last_name: form.last_name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      specialisation: form.specialisation.trim(),
+      licence_number: form.licence_number.trim(),
+    };
+
+    console.log("Sending payload:", payload);
+    const response = await axios.post('/doctors', payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    toast.success('Doctor created successfully');
+    navigate('/doctors', { state: { type: 'success', message: `Doctor "${response.data.first_name} ${response.data.last_name}" created` } });
+  } catch (err) {
+    console.error("Full error:", err);
+    console.error("Error response:", err.response?.data);
+    if (err.response && err.response.data) {
+      const data = err.response.data;
+      if (data.error?.issues) {
+        // Zod validation errors
+        const msgs = data.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join('\n');
+        toast.error(msgs);
+      } else if (typeof data === 'string') {
+        toast.error(data);
+      } else if (Array.isArray(data)) {
+        toast.error(data.join(', '));
+      } else if (data.errors) {
+        const msgs = Object.entries(data.errors).map(([field, msgs]) => `${field}: ${msgs.join(', ')}`).join('\n');
+        toast.error(msgs);
+      } else if (data.message) {
+        toast.error(data.message);
+      } else {
+        toast.error(JSON.stringify(data));
+      }
+    } else {
+      toast.error(err.message || 'Request failed');
+    }
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -103,19 +129,26 @@ export default function Create() {
                 onChange={handleChange}
                 required
             />
+            <div>
+                <label className="text-sm font-medium">Specialisation</label>
+                <Select value={form.specialisation} onValueChange={handleSelectChange} required>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select specialisation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="General Practitioner">General Practitioner</SelectItem>
+                        <SelectItem value="Dermatologist">Dermatologist</SelectItem>
+                        <SelectItem value="Pediatrician">Pediatrician</SelectItem>
+                        <SelectItem value="Psychiatrist">Psychiatrist</SelectItem>
+                        <SelectItem value="Podiatrist">Podiatrist</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
             <Input 
                 type="text" 
-                placeholder="Specialization (e.g., Cardiology)" 
-                name="specialization" 
-                value={form.specialization} 
-                onChange={handleChange}
-                required
-            />
-            <Input 
-                type="text" 
-                placeholder="License number" 
-                name="license_number" 
-                value={form.license_number} 
+                placeholder="Licence number" 
+                name="licence_number" 
+                value={form.licence_number} 
                 onChange={handleChange}
                 required
             />
