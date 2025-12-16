@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "@/config/api";
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -18,6 +19,7 @@ export default function Show() {
   const [error, setError] = useState(null);
   const { id } = useParams();
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -64,6 +66,11 @@ export default function Show() {
           <p><strong>Medical Record Number:</strong> {patient.medical_record_number}</p>
         </div>
       </CardContent>
+        <Button 
+          variant="outline"
+          onClick={() => navigate('/patients')}
+          className="w-full"
+        >Back to Patients</Button>
       <CardFooter className="flex-col gap-2">
       </CardFooter>
     </Card>
