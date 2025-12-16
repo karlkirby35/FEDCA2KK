@@ -95,6 +95,8 @@ export default function Create() {
 
   return (
     <>
+
+    
         <h1 className="text-2xl font-semibold mb-4">Add Doctor</h1>
         <form onSubmit={handleSubmit} className="space-y-2 max-w-lg">
             <Input 
@@ -158,6 +160,12 @@ export default function Create() {
                 type="submit" 
                 disabled={submitting}
             >{submitting ? 'Creating...' : 'Add Doctor'}</Button>
+             <Button 
+                    className="mt-4" 
+                    variant="outline" 
+                    type="button"
+                    onClick={() => navigate('/doctors')}
+                >Cancel</Button>
         </form>
     </>
   );
