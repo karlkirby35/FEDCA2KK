@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Eye, Pencil } from "lucide-react";
 import DeleteBtn from "@/components/DeleteBtn";
+import { useAuth } from "@/hooks/useAuth";
 
 import {
   Table,
@@ -31,6 +32,7 @@ export default function Index() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { token } = useAuth();
   
 
   useEffect(() => {
@@ -66,12 +68,13 @@ export default function Index() {
   return (
     <>
     
-      <Button
-        asChild
-        variant='outline'
-        className='mb-4 mr-auto block'
-      ><Link size='sm' to={`/patients/create`}>Create New Patient</Link>
-      </Button>
+      {token && (
+        <Button asChild variant="outline" className="mb-4 mr-auto block">
+          <Link size="sm" to={`/patients/create`}>
+            Create New Patient
+          </Link>
+        </Button>
+      )}
 
 
     <Table>
@@ -82,7 +85,7 @@ export default function Index() {
           <TableHead>Last Name</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Phone</TableHead>
-          <TableHead></TableHead>
+          {token && <TableHead></TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -92,24 +95,26 @@ export default function Index() {
             <TableCell>{patient.last_name}</TableCell>
             <TableCell>{patient.email}</TableCell>
             <TableCell>{patient.phone}</TableCell>
-            <TableCell>
-              <div className="flex gap-2">
-              <Button 
-                className="cursor-pointer hover:border-blue-500"
-                variant="outline"
-                size="icon"
-                onClick={() => navigate(`/patients/${patient.id}`)}
-              ><Eye /></Button>
-              <Button 
-                className="cursor-pointer hover:border-blue-500"
-                variant="outline"
-                size="icon"
-                onClick={() => navigate(`/patients/${patient.id}/edit`)}
-              ><Pencil /></Button>
-              <DeleteBtn onDeleteCallback={onDeleteCallback} resource="patients" id={patient.id} />
-              </div>
+            {token && (
+              <TableCell>
+                <div className="flex gap-2">
+                <Button 
+                  className="cursor-pointer hover:border-blue-500"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => navigate(`/patients/${patient.id}`)}
+                ><Eye /></Button>
+                <Button 
+                  className="cursor-pointer hover:border-blue-500"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => navigate(`/patients/${patient.id}/edit`)}
+                ><Pencil /></Button>
+                <DeleteBtn onDeleteCallback={onDeleteCallback} resource="patients" id={patient.id} />
+                </div>
 
-            </TableCell>
+              </TableCell>
+            )}
           </TableRow>
         ))}
       </TableBody>

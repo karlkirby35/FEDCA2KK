@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -12,6 +13,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
+import { Eye, Pencil } from "lucide-react";
+import DeleteBtn from "@/components/DeleteBtn";
 
 export default function PrescriptionsIndex() {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -28,7 +31,29 @@ export default function PrescriptionsIndex() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setPrescriptions(response.data);
+        console.log('Raw prescriptions:', response.data);
+        
+        const prescriptionsWithData = await Promise.all(
+          response.data.map(async (rx) => {
+            try {
+              const [patientRes, doctorRes] = await Promise.all([
+                axios.get(`/patients/${rx.patient_id}`, { headers: { Authorization: `Bearer ${token}` }}),
+                axios.get(`/doctors/${rx.doctor_id}`, { headers: { Authorization: `Bearer ${token}` }})
+              ]);
+              return {
+                ...rx,
+                patient: patientRes.data,
+                doctor: doctorRes.data
+              };
+            } catch (err) {
+              console.error('Error fetching patient/doctor for prescription', rx.id, err);
+              return rx;
+            }
+          })
+        );
+        
+        console.log('Prescriptions with patient/doctor data:', prescriptionsWithData);
+        setPrescriptions(prescriptionsWithData);
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -39,6 +64,10 @@ export default function PrescriptionsIndex() {
 
     fetchPrescriptions();
   }, [token]);
+
+  const onDeleteCallback = (id) => {
+    setPrescriptions(prescriptions.filter(prescription => prescription.id !== id));
+  };
 
   if (loading) return <div>Loading prescriptions...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -58,10 +87,6 @@ export default function PrescriptionsIndex() {
             <TableHead>Patient</TableHead>
             <TableHead>Doctor</TableHead>
             <TableHead>Medication</TableHead>
-            <TableHead>Dosage</TableHead>
-            <TableHead>Issue Date</TableHead>
-            <TableHead>Expiry Date</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -71,18 +96,23 @@ export default function PrescriptionsIndex() {
               <TableCell>{prescription.id}</TableCell>
               <TableCell>{prescription.patient?.first_name} {prescription.patient?.last_name}</TableCell>
               <TableCell>{prescription.doctor?.first_name} {prescription.doctor?.last_name}</TableCell>
-              <TableCell>{prescription.medication_name}</TableCell>
-              <TableCell>{prescription.dosage}</TableCell>
-              <TableCell>{prescription.issue_date}</TableCell>
-              <TableCell>{prescription.expiry_date}</TableCell>
-              <TableCell>{prescription.status}</TableCell>
+              <TableCell>{prescription.medication}</TableCell>
               <TableCell>
-                <button
-                  onClick={() => navigate(`/prescriptions/${prescription.id}`)}
-                  className="text-blue-600 hover:underline"
-                >
-                  View
-                </button>
+                <div className="flex gap-2">
+                  <Button 
+                    className="cursor-pointer hover:border-blue-500"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/prescriptions/${prescription.id}`)}
+                  ><Eye /></Button>
+                  <Button 
+                    className="cursor-pointer hover:border-blue-500"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/prescriptions/${prescription.id}/edit`)}
+                  ><Pencil /></Button>
+                  <DeleteBtn onDeleteCallback={onDeleteCallback} resource="prescriptions" id={prescription.id} />
+                </div>
               </TableCell>
             </TableRow>
           ))}

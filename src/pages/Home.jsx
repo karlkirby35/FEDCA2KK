@@ -6,8 +6,9 @@ export default function Home() {
     const { token } = useAuth();
     return (
         <>  
-            {!token && <LoginForm />}
-             {!token && <RegisterForm />}
+            <h1>Welcome to the Healthcare Management System</h1>
+            <LoginForm />
+            <RegisterForm />
             
         </>
     );

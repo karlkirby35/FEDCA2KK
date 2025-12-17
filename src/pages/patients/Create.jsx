@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import axios from "@/config/api";
 import { useNavigate } from 'react-router';
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from 'sonner';
 
 export default function Create() {
     const [form, setForm] = useState({
@@ -16,7 +15,6 @@ export default function Create() {
         date_of_birth: "",
         medical_record_number: "",
     });
-    const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
     const { token } = useAuth();
 
@@ -28,45 +26,27 @@ export default function Create() {
     };
 
     const createPatient = async () => {
-        setSubmitting(true);
+
+        const options = {
+            method: "POST",
+            url: `/patients`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: form
+        };
+
         try {
-            const response = await axios.post('/patients', form, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            console.log('Patient created:', response.data);
-            toast.success('Patient created successfully');
-            navigate('/patients', { state: { type: 'success', message: `Patient "${response.data.first_name} ${response.data.last_name}" created` } });
+            let response = await axios.request(options);
+            console.log(response.data);
+            navigate('/patients', { state: { 
+                type: 'success',
+                message: `Patient "${response.data.first_name} ${response.data.last_name}" created successfully` 
+            }});
         } catch (err) {
-            console.error("Full error:", err);
-            console.error("Error response:", err.response?.data);
-            // show validation errors if available
-            if (err.response && err.response.data) {
-                const data = err.response.data;
-                if (data.error?.issues) {
-                    // Zod validation errors
-                    const msgs = data.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join('\n');
-                    toast.error(msgs);
-                } else if (typeof data === 'string') {
-                    toast.error(data);
-                } else if (Array.isArray(data)) {
-                    toast.error(data.join(', '));
-                } else if (data.errors) {
-                    // Laravel-like validation: { errors: { field: [msg] } }
-                    const msgs = Object.entries(data.errors).map(([field, msgs]) => `${field}: ${msgs.join(', ')}`).join('\n');
-                    toast.error(msgs);
-                } else if (data.message) {
-                    toast.error(data.message);
-                } else {
-                    toast.error(JSON.stringify(data));
-                }
-            } else {
-                toast.error(err.message || 'Request failed');
-            }
-        } finally {
-            setSubmitting(false);
+            console.log(err);
         }
+
     };
 
     const handleSubmit = (e) => {
@@ -76,15 +56,8 @@ export default function Create() {
 
   return (
     <>
-        <Button 
-            variant="outline" 
-            className="mb-4 w-fit"
-            onClick={() => navigate('/patients')}
-        >← Back</Button>
-    
-        <h1 className="text-2xl font-semibold mb-4">Create Patient</h1>
-        <form onSubmit={handleSubmit} className="space-y-2 max-w-lg">
-            
+        <h1>Create a new Patient</h1>
+        <form onSubmit={handleSubmit}>
             <Input 
                 type="text" 
                 placeholder="First name" 
@@ -93,6 +66,7 @@ export default function Create() {
                 onChange={handleChange} 
             />
             <Input 
+                className="mt-2"
                 type="text" 
                 placeholder="Last name" 
                 name="last_name" 
@@ -100,6 +74,7 @@ export default function Create() {
                 onChange={handleChange} 
             />
             <Input 
+                className="mt-2"
                 type="email" 
                 placeholder="Email" 
                 name="email" 
@@ -107,14 +82,15 @@ export default function Create() {
                 onChange={handleChange} 
             />
             <Input 
+                className="mt-2"
                 type="text" 
-                placeholder="Phone (min 10 characters)" 
+                placeholder="Phone" 
                 name="phone" 
                 value={form.phone} 
                 onChange={handleChange}
-                minLength="10"
             />
             <Input 
+                className="mt-2"
                 type="text" 
                 placeholder="Address" 
                 name="address" 
@@ -122,6 +98,7 @@ export default function Create() {
                 onChange={handleChange}
             />
             <Input 
+                className="mt-2"
                 type="date" 
                 placeholder="Date of birth" 
                 name="date_of_birth" 
@@ -129,6 +106,7 @@ export default function Create() {
                 onChange={handleChange} 
             />
             <Input 
+                className="mt-2"
                 type="text" 
                 placeholder="Medical record number" 
                 name="medical_record_number" 
@@ -136,11 +114,10 @@ export default function Create() {
                 onChange={handleChange} 
             />
             <Button 
-                className="mt-4" 
+                className="mt-4 cursor-pointer" 
                 variant="outline" 
                 type="submit" 
-                disabled={submitting}
-            >{submitting ? 'Creating...' : 'Create Patient'}</Button>
+            >Submit</Button>
         </form>
     </>
   );

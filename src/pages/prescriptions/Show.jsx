@@ -28,7 +28,24 @@ export default function PrescriptionShow() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setPrescription(response.data);
+        
+        // Fetch patient and doctor data
+        let prescriptionData = response.data;
+        try {
+          const [patientRes, doctorRes] = await Promise.all([
+            axios.get(`/patients/${response.data.patient_id}`, { headers: { Authorization: `Bearer ${token}` }}),
+            axios.get(`/doctors/${response.data.doctor_id}`, { headers: { Authorization: `Bearer ${token}` }})
+          ]);
+          prescriptionData = {
+            ...response.data,
+            patient: patientRes.data,
+            doctor: doctorRes.data
+          };
+        } catch (err) {
+          console.error('Error fetching patient/doctor:', err);
+        }
+        
+        setPrescription(prescriptionData);
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -55,7 +72,7 @@ export default function PrescriptionShow() {
         <CardHeader>
           <CardTitle>Prescription #{prescription.id}</CardTitle>
           <CardDescription>
-            Status: {prescription.status}
+            Diagnosis ID: {prescription.diagnosis_id}
           </CardDescription>
         </CardHeader>
       <CardContent>
@@ -69,42 +86,69 @@ export default function PrescriptionShow() {
               <p className="text-sm font-medium text-gray-600">Doctor</p>
               <p>{prescription.doctor?.first_name} {prescription.doctor?.last_name}</p>
             </div>
-            <div>
+            <div className="col-span-2">
               <p className="text-sm font-medium text-gray-600">Medication</p>
-              <p>{prescription.medication_name}</p>
+              <p>{prescription.medication || prescription.medication_name || 'N/A'}</p>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Dosage</p>
-              <p>{prescription.dosage}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Frequency</p>
-              <p>{prescription.frequency}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Duration</p>
-              <p>{prescription.duration}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Issue Date</p>
-              <p>{prescription.issue_date}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Expiry Date</p>
-              <p>{prescription.expiry_date}</p>
-            </div>
+            {prescription.dosage && (
+              <div>
+                <p className="text-sm font-medium text-gray-600">Dosage</p>
+                <p>{prescription.dosage}</p>
+              </div>
+            )}
+            {prescription.frequency && (
+              <div>
+                <p className="text-sm font-medium text-gray-600">Frequency</p>
+                <p>{prescription.frequency}</p>
+              </div>
+            )}
+            {prescription.duration && (
+              <div>
+                <p className="text-sm font-medium text-gray-600">Duration</p>
+                <p>{prescription.duration}</p>
+              </div>
+            )}
+            {prescription.issue_date && (
+              <div>
+                <p className="text-sm font-medium text-gray-600">Start Date</p>
+                <p>{prescription.issue_date}</p>
+              </div>
+            )}
+            {prescription.expiry_date && (
+              <div>
+                <p className="text-sm font-medium text-gray-600">End Date</p>
+                <p>{prescription.expiry_date}</p>
+              </div>
+            )}
+            {prescription.status && (
+              <div>
+                <p className="text-sm font-medium text-gray-600">Status</p>
+                <p>{prescription.status}</p>
+              </div>
+            )}
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-600">Instructions</p>
-            <p>{prescription.instructions}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-600">Side Effects/Warnings</p>
-            <p>{prescription.side_effects}</p>
-          </div>
+          {prescription.instructions && (
+            <div>
+              <p className="text-sm font-medium text-gray-600">Instructions</p>
+              <p>{prescription.instructions}</p>
+            </div>
+          )}
+          {prescription.side_effects && (
+            <div>
+              <p className="text-sm font-medium text-gray-600">Side Effects/Warnings</p>
+              <p>{prescription.side_effects}</p>
+            </div>
+          )}
         </div>
       </CardContent>
         <CardFooter className="flex-col gap-2">
+          <Button 
+            variant="default"
+            onClick={() => navigate(`/prescriptions/${prescription.id}/edit`)}
+            className="w-full"
+          >
+            Edit Prescription
+          </Button>
         </CardFooter>
       </Card>
     </>

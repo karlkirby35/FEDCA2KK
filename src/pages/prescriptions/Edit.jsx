@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import axios from "@/config/api";
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from 'sonner';
 import {
@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function Create() {
+export default function Edit() {
     const [form, setForm] = useState({
         patient_id: "",
         doctor_id: "",
@@ -28,30 +28,54 @@ export default function Create() {
         end_date: "",
         status: "active",
     });
-
     const [patients, setPatients] = useState([]);
     const [doctors, setDoctors] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
+    const { id } = useParams();
     const { token } = useAuth();
-
-    // Fetch patients and doctors on load
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [patientsRes, doctorsRes] = await Promise.all([
-                    axios.get('/patients', { headers: { Authorization: `Bearer ${token}` } }),
-                    axios.get('/doctors', { headers: { Authorization: `Bearer ${token}` } })
+                const [prescriptionRes, patientsRes, doctorsRes] = await Promise.all([
+                    axios.get(`/prescriptions/${id}`, { headers: { Authorization: `Bearer ${token}` }}),
+                    axios.get('/patients', { headers: { Authorization: `Bearer ${token}` }}),
+                    axios.get('/doctors', { headers: { Authorization: `Bearer ${token}` }})
                 ]);
+                
                 setPatients(patientsRes.data);
                 setDoctors(doctorsRes.data);
+                
+                setForm({
+                    patient_id: prescriptionRes.data.patient_id?.toString() || "",
+                    doctor_id: prescriptionRes.data.doctor_id?.toString() || "",
+                    diagnosis_id: prescriptionRes.data.diagnosis_id?.toString() || "",
+                    medication: prescriptionRes.data.medication || "",
+                    dosage: prescriptionRes.data.dosage || "",
+                    frequency: prescriptionRes.data.frequency || "",
+                    duration: prescriptionRes.data.duration || "",
+                    instructions: prescriptionRes.data.instructions || "",
+                    side_effects: prescriptionRes.data.side_effects || "",
+                    start_date: prescriptionRes.data.issue_date || "",
+                    end_date: prescriptionRes.data.expiry_date || "",
+                    status: prescriptionRes.data.status || "active",
+                });
             } catch (err) {
                 console.error(err);
-                toast.error('Failed to load patients/doctors');
+                if (err.response?.status === 404) {
+                    toast.error('Prescription not found');
+                    navigate('/prescriptions');
+                } else {
+                    toast.error('Failed to load prescription data');
+                }
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
-    }, [token]);
+    }, [id, token, navigate]);
 
     const handleChange = (e) => {
         setForm({
@@ -67,10 +91,9 @@ export default function Create() {
         });
     };
 
-    const createPrescription = async () => {
+    const updatePrescription = async () => {
         setSubmitting(true);
         try {
-            // Convert IDs to numbers and prepare payload
             const payload = {
                 patient_id: parseInt(form.patient_id),
                 doctor_id: parseInt(form.doctor_id),
@@ -85,29 +108,46 @@ export default function Create() {
                 end_date: form.end_date,
                 status: form.status,
             };
-            console.log('Sending prescription payload:', payload);
-            const response = await axios.post('/prescriptions', payload, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+            
+            let response;
+            try {
+                response = await axios.patch(`/prescriptions/${id}`, payload, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            } catch (patchErr) {
+                if (patchErr.response?.status === 404) {
+                    response = await axios.put(`/prescriptions/${id}`, payload, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                } else {
+                    throw patchErr;
                 }
-            });
-            toast.success('Prescription created successfully');
-            navigate('/prescriptions', { state: { type: 'success', message: 'Prescription created' } });
+            }
+            toast.success('Prescription updated successfully');
+            navigate('/prescriptions');
         } catch (err) {
-            console.error('Full error:', err);
-            console.error('Error response:', err.response?.data);
+            console.error("Full error:", err);
+            console.error("Error response:", err.response?.data);
             if (err.response && err.response.data) {
                 const data = err.response.data;
                 if (data.error?.issues) {
                     const msgs = data.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join('\n');
                     toast.error(msgs);
+                } else if (typeof data === 'string') {
+                    toast.error(data);
+                } else if (Array.isArray(data)) {
+                    toast.error(data.join(', '));
+                } else if (data.errors) {
+                    const msgs = Object.entries(data.errors).map(([field, msgs]) => `${field}: ${msgs.join(', ')}`).join('\n');
+                    toast.error(msgs);
                 } else if (data.message) {
                     toast.error(data.message);
-                } else if (data.errors) {
-                    const msgs = Object.values(data.errors).flat().join(' - ');
-                    toast.error(msgs);
                 } else {
-                    toast.error('Validation failed');
+                    toast.error(JSON.stringify(data));
                 }
             } else {
                 toast.error(err.message || 'Request failed');
@@ -119,24 +159,20 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!form.patient_id || !form.doctor_id) {
-            toast.error('Please select a patient and doctor');
+        if (!form.patient_id || !form.doctor_id || !form.diagnosis_id) {
+            toast.error('Please select a patient, doctor, and diagnosis');
             return;
         }
-        createPrescription();
+        updatePrescription();
     };
+
+    if (loading) return <div>Loading prescription data...</div>;
 
   return (
     <>
-        <Button 
-            variant="outline" 
-            className="mb-4 w-fit"
-            onClick={() => navigate('/prescriptions')}
-        >← Back</Button>
-        <h1 className="text-2xl font-semibold mb-4">Create Prescription</h1>
-        <form onSubmit={handleSubmit} className="space-y-3 max-w-2xl">
+        <h1 className="text-2xl font-semibold mb-4">Edit Prescription</h1>
+        <form onSubmit={handleSubmit} className="space-y-2 max-w-2xl">
             
-            {/* Patient Select */}
             <div>
                 <label className="text-sm font-medium">Patient</label>
                 <Select value={form.patient_id} onValueChange={(value) => handleSelectChange('patient_id', value)}>
@@ -153,7 +189,6 @@ export default function Create() {
                 </Select>
             </div>
 
-            {/* Doctor Select */}
             <div>
                 <label className="text-sm font-medium">Doctor</label>
                 <Select value={form.doctor_id} onValueChange={(value) => handleSelectChange('doctor_id', value)}>
@@ -170,57 +205,46 @@ export default function Create() {
                 </Select>
             </div>
 
-            {/* Diagnosis ID */}
             <Input 
                 type="number" 
                 placeholder="Diagnosis ID" 
                 name="diagnosis_id" 
                 value={form.diagnosis_id} 
                 onChange={handleChange}
-                required
             />
 
-            {/* Medication */}
             <Input 
                 type="text" 
                 placeholder="Medication name" 
                 name="medication" 
                 value={form.medication} 
                 onChange={handleChange}
-                required
             />
 
-            {/* Dosage */}
             <Input 
                 type="text" 
                 placeholder="Dosage (e.g., 500mg)" 
                 name="dosage" 
                 value={form.dosage} 
                 onChange={handleChange}
-                required
             />
 
-            {/* Frequency */}
             <Input 
                 type="text" 
                 placeholder="Frequency (e.g., twice daily)" 
                 name="frequency" 
                 value={form.frequency} 
                 onChange={handleChange}
-                required
             />
 
-            {/* Duration */}
             <Input 
                 type="text" 
                 placeholder="Duration (e.g., 7 days)" 
                 name="duration" 
                 value={form.duration} 
                 onChange={handleChange}
-                required
             />
 
-            {/* Instructions */}
             <textarea 
                 placeholder="Instructions (e.g., take with food)" 
                 name="instructions" 
@@ -230,7 +254,6 @@ export default function Create() {
                 rows="2"
             />
 
-            {/* Side Effects */}
             <textarea 
                 placeholder="Side effects/warnings" 
                 name="side_effects" 
@@ -240,7 +263,6 @@ export default function Create() {
                 rows="2"
             />
 
-            {/* Issue Date */}
             <div>
                 <label className="text-sm font-medium">Start date</label>
                 <Input 
@@ -248,11 +270,9 @@ export default function Create() {
                     name="start_date" 
                     value={form.start_date} 
                     onChange={handleChange}
-                    required
                 />
             </div>
 
-            {/* Expiry Date */}
             <div>
                 <label className="text-sm font-medium">End date</label>
                 <Input 
@@ -260,11 +280,9 @@ export default function Create() {
                     name="end_date" 
                     value={form.end_date} 
                     onChange={handleChange}
-                    required
                 />
             </div>
 
-            {/* Status */}
             <div>
                 <label className="text-sm font-medium">Status</label>
                 <Select value={form.status} onValueChange={(value) => handleSelectChange('status', value)}>
@@ -273,20 +291,25 @@ export default function Create() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
 
-            <Button 
-                className="mt-6" 
-                variant="outline" 
-                type="submit" 
-                disabled={submitting}
-            >{submitting ? 'Creating...' : 'Create Prescription'}</Button>
+            <div className="flex gap-2">
+                <Button 
+                    className="mt-4" 
+                    variant="outline" 
+                    type="submit" 
+                    disabled={submitting}
+                >{submitting ? 'Updating...' : 'Update Prescription'}</Button>
+                <Button 
+                    className="mt-4" 
+                    variant="outline" 
+                    type="button"
+                    onClick={() => navigate('/prescriptions')}
+                >Cancel</Button>
+            </div>
         </form>
     </>
   );

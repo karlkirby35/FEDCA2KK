@@ -70,6 +70,13 @@ export default function DoctorShow() {
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-2">
+        <Button 
+          variant="default"
+          onClick={() => navigate(`/doctors/${doctor.id}/edit`)}
+          className="w-full"
+        >
+          Edit Doctor
+        </Button>
       </CardFooter>
     </Card>
     </>

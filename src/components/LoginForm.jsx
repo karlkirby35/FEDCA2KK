@@ -64,13 +64,13 @@ export default function LoginForm() {
                 onChange={handleForm}
               />
             </div>
+            <Button variant='outline' type="submit" className="w-full">
+              Login
+            </Button>
           </div>
         </form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
-        <Button variant='outline' onClick={submitForm} type="submit" className="w-full">
-          Login
-        </Button>
       </CardFooter>
     </Card>
   );

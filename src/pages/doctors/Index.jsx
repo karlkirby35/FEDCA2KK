@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "@/config/api";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
+import { Eye, Pencil } from "lucide-react";
+import DeleteBtn from "@/components/DeleteBtn";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -14,71 +17,85 @@ import {
 
 export default function DoctorsIndex() {
   const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { token } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDoctors = async () => {
+      const options = {
+        method: "GET",
+        url: "/doctors",
+      };
+
       try {
-        const response = await axios.get("/doctors", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        let response = await axios.request(options);
+        console.log(response.data);
         setDoctors(response.data);
       } catch (err) {
-        console.error(err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        console.log(err);
       }
     };
 
     fetchDoctors();
-  }, [token]);
+  }, []);
 
-  if (loading) return <div>Loading doctors...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const onDeleteCallback = (id) => {
+    setDoctors(doctors.filter(doctor => doctor.id !== id));
+  };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Doctors</h1>
-        <Button onClick={() => navigate('/doctors/create')}>Create Doctor</Button>
-      </div>
+    <>
+      {token && (
+        <Button asChild variant="outline" className="mb-4 mr-auto block">
+          <Link size="sm" to={`/doctors/create`}>
+            Create New Doctor
+          </Link>
+        </Button>
+      )}
+
       <Table>
+        <TableCaption>A list of your doctors.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Specialization</TableHead>
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
+            <TableHead>Specialisation</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
-            <TableHead>Actions</TableHead>
+            {token && <TableHead></TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {doctors.map((doctor) => (
             <TableRow key={doctor.id}>
-              <TableCell>{doctor.id}</TableCell>
-              <TableCell>{doctor.first_name} {doctor.last_name}</TableCell>
+              <TableCell>{doctor.first_name}</TableCell>
+              <TableCell>{doctor.last_name}</TableCell>
               <TableCell>{doctor.specialisation}</TableCell>
               <TableCell>{doctor.email}</TableCell>
               <TableCell>{doctor.phone}</TableCell>
-              <TableCell>
-                <button
-                  onClick={() => navigate(`/doctors/${doctor.id}`)}
-                  className="text-blue-600 hover:underline"
-                >
-                  View
-                </button>
-              </TableCell>
+              {token && (
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button 
+                      className="cursor-pointer hover:border-blue-500"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => navigate(`/doctors/${doctor.id}`)}
+                    ><Eye /></Button>
+                    <Button 
+                      className="cursor-pointer hover:border-blue-500"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => navigate(`/doctors/${doctor.id}/edit`)}
+                    ><Pencil /></Button>
+                    <DeleteBtn onDeleteCallback={onDeleteCallback} resource="doctors" id={doctor.id} />
+                  </div>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </div>
+    </>
   );
 }

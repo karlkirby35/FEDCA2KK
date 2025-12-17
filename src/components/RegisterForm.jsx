@@ -99,13 +99,13 @@ export default function RegisterForm() {
                 onChange={handleForm}
               />
             </div>
+            <Button variant="outline" type="submit" className="w-full">
+              Register
+            </Button>
           </div>
         </form>
       </CardContent>
       <CardFooter className="flex-col gap-2">
-        <Button variant="outline" onClick={submitForm} className="w-full">
-          Register
-        </Button>
       </CardFooter>
     </Card>
   );

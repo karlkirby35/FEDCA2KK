@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-
+import { useAuth } from "@/hooks/useAuth"
 import { useLocation } from "react-router"
 
 export function SiteHeader() {
 
   let location = useLocation();
+  const { user, onLogout } = useAuth();
 
   const getPageTitle = () => {
     const path = location.pathname.split('/').filter(Boolean).pop() || 'dashboard';
@@ -21,6 +22,16 @@ export function SiteHeader() {
         <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
         <h1 className="text-base font-medium">{getPageTitle()}</h1>
         <div className="ml-auto flex items-center gap-2">
+          {user && (
+            <>
+              <span className="text-sm text-muted-foreground">
+                {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.email}
+              </span>
+              <Button variant="ghost" size="sm" onClick={onLogout}>
+                Logout
+              </Button>
+            </>
+          )}
           <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
             <a
               href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"

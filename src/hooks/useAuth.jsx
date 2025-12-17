@@ -13,12 +13,18 @@ export const useAuth = () => {
 // children is a prop that represents the nested components
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(() => localStorage.getItem('token') || null);
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
 
     const onLogin = async (email, password) => {
         try {
             const response = await axios.post("/login", { email, password });
             localStorage.setItem("token", response.data.token);
+            localStorage.setItem("user", JSON.stringify(response.data.user || { email }));
             setToken(response.data.token);
+            setUser(response.data.user || { email });
         } catch (err) {
             console.log(err.response?.data || err);
         }
@@ -28,7 +34,9 @@ export const AuthProvider = ({ children }) => {
   try {
     const response = await axios.post("/register", { first_name, last_name, email, password });
     localStorage.setItem("token", response.data.token);
+    localStorage.setItem("user", JSON.stringify(response.data.user || { first_name, last_name, email }));
     setToken(response.data.token);
+    setUser(response.data.user || { first_name, last_name, email });
   } catch (err) {
     console.log(err.response?.data || err);
   }
@@ -37,11 +45,14 @@ export const AuthProvider = ({ children }) => {
 
     const onLogout = () => {
         setToken(null);
+        setUser(null);
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
     };
 
     const value = {
         token,
+        user,
         onLogin,
         onRegister, 
         onLogout

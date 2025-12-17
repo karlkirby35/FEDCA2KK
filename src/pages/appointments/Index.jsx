@@ -3,9 +3,12 @@ import axios from "@/config/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
+import { Eye, Pencil } from "lucide-react";
+import DeleteBtn from "@/components/DeleteBtn";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -37,7 +40,6 @@ export default function AppointmentsIndex() {
           patient: patientRes.data,
           doctor: doctorRes.data
         };
-        console.log('Appointment data:', enrichedAppt);
         return enrichedAppt;
       })
     );
@@ -56,6 +58,10 @@ export default function AppointmentsIndex() {
 
     fetchAppointments();
   }, [token]);
+
+  const onDeleteCallback = (id) => {
+    setAppointments(appointments.filter(appointment => appointment.id !== id));
+  };
 
   if (loading) return <div>Loading appointments...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -96,12 +102,21 @@ export default function AppointmentsIndex() {
               <TableCell>{appointment.doctor?.first_name} {appointment.doctor?.last_name}</TableCell>
               <TableCell>{appointmentDate}</TableCell>
               <TableCell>
-                <button
-                  onClick={() => navigate(`/appointments/${appointment.id}`)}
-                  className="text-blue-600 hover:underline"
-                >
-                  View
-                </button>
+                <div className="flex gap-2">
+                  <Button 
+                    className="cursor-pointer hover:border-blue-500"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/appointments/${appointment.id}`)}
+                  ><Eye /></Button>
+                  <Button 
+                    className="cursor-pointer hover:border-blue-500"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/appointments/${appointment.id}/edit`)}
+                  ><Pencil /></Button>
+                  <DeleteBtn onDeleteCallback={onDeleteCallback} resource="appointments" id={appointment.id} />
+                </div>
               </TableCell>
             </TableRow>
           );

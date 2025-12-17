@@ -97,6 +97,13 @@ const [doctor, setDoctor] = useState(null);
 </CardContent>
 
       <CardFooter className="flex-col gap-2">
+        <Button 
+          variant="default"
+          onClick={() => navigate(`/appointments/${appointment.id}/edit`)}
+          className="w-full"
+        >
+          Edit Appointment
+        </Button>
       </CardFooter>
     </Card>
     </>
