@@ -41,7 +41,7 @@ export default function WeatherForm() {
       <h2 className="text-xl font-semibold mb-4">Upcoming Holidays</h2>
       
       <Button onClick={fetchHolidays} disabled={loading} className="w-full mb-4">
-        {loading ? 'Loading...' : 'Get US Holidays'}
+        {loading ? 'Loading...' : 'Get Holidays'}
       </Button>
 
       {holidays.length > 0 && (
