@@ -81,8 +81,8 @@ export default function Create() {
                 duration: form.duration.trim(),
                 instructions: form.instructions.trim(),
                 side_effects: form.side_effects.trim(),
-                issue_date: form.start_date,
-                expiry_date: form.end_date,
+                start_date: form.start_date,
+                end_date: form.end_date,
                 status: form.status,
             };
             console.log('Sending prescription payload:', payload);
@@ -121,6 +121,10 @@ export default function Create() {
         e.preventDefault();
         if (!form.patient_id || !form.doctor_id) {
             toast.error('Please select a patient and doctor');
+            return;
+        }
+        if (!form.diagnosis_id) {
+            toast.error('Diagnosis ID is required');
             return;
         }
         createPrescription();
@@ -171,14 +175,17 @@ export default function Create() {
             </div>
 
             {/* Diagnosis ID */}
-            <Input 
-                type="number" 
-                placeholder="Diagnosis ID" 
-                name="diagnosis_id" 
-                value={form.diagnosis_id} 
-                onChange={handleChange}
-                required
-            />
+            <div>
+                <label className="text-sm font-medium">Diagnosis ID</label>
+                <Input 
+                    type="number" 
+                    placeholder="Enter valid diagnosis ID" 
+                    name="diagnosis_id" 
+                    value={form.diagnosis_id} 
+                    onChange={handleChange}
+                    required
+                />
+            </div>
 
             {/* Medication */}
             <Input 
