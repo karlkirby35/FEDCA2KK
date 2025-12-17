@@ -1,8 +1,6 @@
 <<<<<<< HEAD
-# Front-End Development CA2 Example Code
-
-This is the in-class CA2 example code. 
-Apply what you learn while developing this to your own CA2 Medical Clinic Application.
+# Front-End Development CA2 
+Karl Kirby Medical CA2
 
 ## Instructions:
 
@@ -11,3 +9,11 @@ Apply what you learn while developing this to your own CA2 Medical Clinic Applic
 =======
 # FEDCA2KK
 >>>>>>> bd62cc88c88ce1f610eceab27aa756ee2675bd6c
+
+# api key 
+VITE_CALENDARIFIC_API_KEY=bwt7yIDqrLyVBeUC3NuRqbmrrDRsi90P
+
+# github link: 
+https://github.com/karlkirby35/FEDCA2KK.git
+
+
