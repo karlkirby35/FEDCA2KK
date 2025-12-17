@@ -1,6 +1,6 @@
 import { AuthProvider } from './hooks/useAuth';
 
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router";
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
@@ -49,40 +49,7 @@ export default function App() {
             <div className="@container/main flex flex-1 flex-col gap-2">
               <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 mx-6">
                 {/* Main content */}
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/patients" element={<PatientsIndex />} />
-
-                  <Route path="/" element={<ProtectedRoute />}>
-                    <Route path="/patients/:id" element={<PatientsShow />} />
-                    <Route path="/patients/:id/edit" element={<PatientsEdit />} />
-                    <Route path="/patients/create" element={<PatientsCreate />} />
-                  </Route>
-
-                  <Route path="/doctors" element={<DoctorsIndex />} />
-
-                  <Route path="/" element={<ProtectedRoute />}>
-                    <Route path="/doctors/:id" element={<DoctorsShow />} />
-                    <Route path="/doctors/:id/edit" element={<DoctorsEdit />} />
-                    <Route path="/doctors/create" element={<DoctorsCreate />} />
-                  </Route>
-
-                  <Route path="/appointments" element={<AppointmentsIndex />} />
-
-                  <Route path="/" element={<ProtectedRoute />}>
-                    <Route path="/appointments/:id" element={<AppointmentsShow />} />
-                    <Route path="/appointments/:id/edit" element={<AppointmentsEdit />} />
-                    <Route path="/appointments/create" element={<AppointmentsCreate />} />
-                  </Route>
-
-                  <Route path="/prescriptions" element={<PrescriptionsIndex />} />
-
-                  <Route path="/" element={<ProtectedRoute />}>
-                    <Route path="/prescriptions/:id" element={<PrescriptionsShow />} />
-                    <Route path="/prescriptions/:id/edit" element={<PrescriptionsEdit />} />
-                    <Route path="/prescriptions/create" element={<PrescriptionsCreate />} />
-                  </Route>
-                </Routes>
+                <AnimatedRoutes />
               </div>
             </div>
           </div>
@@ -90,5 +57,51 @@ export default function App() {
       </SidebarProvider>
       </AuthProvider>
     </Router>
+  );
+}
+
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <div
+      key={location.pathname}
+      className="motion-safe:animate-in motion-safe:fade-in-5 motion-safe:slide-in-from-bottom-50 duration-300"
+    >
+      <Routes location={location}>
+        <Route path="/" element={<Home />} />
+        <Route path="/patients" element={<PatientsIndex />} />
+
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="/patients/:id" element={<PatientsShow />} />
+          <Route path="/patients/:id/edit" element={<PatientsEdit />} />
+          <Route path="/patients/create" element={<PatientsCreate />} />
+        </Route>
+
+        <Route path="/doctors" element={<DoctorsIndex />} />
+
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="/doctors/:id" element={<DoctorsShow />} />
+          <Route path="/doctors/:id/edit" element={<DoctorsEdit />} />
+          <Route path="/doctors/create" element={<DoctorsCreate />} />
+        </Route>
+
+        <Route path="/appointments" element={<AppointmentsIndex />} />
+
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="/appointments/:id" element={<AppointmentsShow />} />
+          <Route path="/appointments/:id/edit" element={<AppointmentsEdit />} />
+          <Route path="/appointments/create" element={<AppointmentsCreate />} />
+        </Route>
+
+        <Route path="/prescriptions" element={<PrescriptionsIndex />} />
+
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="/prescriptions/:id" element={<PrescriptionsShow />} />
+          <Route path="/prescriptions/:id/edit" element={<PrescriptionsEdit />} />
+          <Route path="/prescriptions/create" element={<PrescriptionsCreate />} />
+        </Route>
+      </Routes>
+    </div>
   );
 }

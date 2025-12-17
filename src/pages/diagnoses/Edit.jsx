@@ -12,22 +12,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Edit() {
     const [form, setForm] = useState({
         patient_id: "",
         doctor_id: "",
-        appointment_date: "",
-        appointment_time: "",
-        reason: "",
+        condition: "",
+        description: "",
+        diagnosis_date: "",
+        status: "active",
+        severity: "mild",
         notes: "",
-        status: "scheduled",
     });
     const [patients, setPatients] = useState([]);
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
     const { id } = useParams();
@@ -36,9 +35,8 @@ export default function Edit() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setError(null);
-                const [appointmentRes, patientsRes, doctorsRes] = await Promise.all([
-                    axios.get(`/appointments/${id}`, { headers: { Authorization: `Bearer ${token}` }}),
+                const [diagnosisRes, patientsRes, doctorsRes] = await Promise.all([
+                    axios.get(`/diagnoses/${id}`, { headers: { Authorization: `Bearer ${token}` }}),
                     axios.get('/patients', { headers: { Authorization: `Bearer ${token}` }}),
                     axios.get('/doctors', { headers: { Authorization: `Bearer ${token}` }})
                 ]);
@@ -46,33 +44,23 @@ export default function Edit() {
                 setPatients(patientsRes.data);
                 setDoctors(doctorsRes.data);
                 
-                let appointmentDate = appointmentRes.data.appointment_date || "";
-                if (appointmentDate && !isNaN(appointmentDate)) {
-                    let timestamp = parseInt(appointmentDate);
-                    if (timestamp < 10000000000) {
-                        timestamp = timestamp * 1000;
-                    }
-                    const date = new Date(timestamp);
-                    appointmentDate = date.toISOString().split('T')[0];
-                }
-                
                 setForm({
-                    patient_id: appointmentRes.data.patient_id?.toString() || "",
-                    doctor_id: appointmentRes.data.doctor_id?.toString() || "",
-                    appointment_date: appointmentDate,
-                    appointment_time: appointmentRes.data.appointment_time || "",
-                    reason: appointmentRes.data.reason || "",
-                    notes: appointmentRes.data.notes || "",
-                    status: appointmentRes.data.status || "scheduled",
+                    patient_id: diagnosisRes.data.patient_id?.toString() || "",
+                    doctor_id: diagnosisRes.data.doctor_id?.toString() || "",
+                    condition: diagnosisRes.data.condition || "",
+                    description: diagnosisRes.data.description || "",
+                    diagnosis_date: diagnosisRes.data.diagnosis_date || "",
+                    status: diagnosisRes.data.status || "active",
+                    severity: diagnosisRes.data.severity || "mild",
+                    notes: diagnosisRes.data.notes || "",
                 });
             } catch (err) {
-                console.error("Load error:", err);
-                const errorMsg = err.response?.status === 404 
-                    ? 'Appointment not found' 
-                    : err.response?.data?.message || 'Failed to load appointment data';
-                setError(errorMsg);
+                console.error(err);
                 if (err.response?.status === 404) {
-                    setTimeout(() => navigate('/appointments'), 2000);
+                    toast.error('Diagnosis not found');
+                    navigate('/diagnoses');
+                } else {
+                    toast.error('Failed to load diagnosis data');
                 }
             } finally {
                 setLoading(false);
@@ -95,24 +83,30 @@ export default function Edit() {
         });
     };
 
-    const updateAppointment = async () => {
+    const updateDiagnosis = async () => {
         setSubmitting(true);
         try {
-            let response;
-            const formData = {
-                ...form,
+            const payload = {
                 patient_id: parseInt(form.patient_id),
-                doctor_id: parseInt(form.doctor_id)
+                doctor_id: parseInt(form.doctor_id),
+                condition: form.condition.trim(),
+                description: form.description.trim(),
+                diagnosis_date: form.diagnosis_date,
+                status: form.status,
+                severity: form.severity,
+                notes: form.notes.trim(),
             };
+            
+            let response;
             try {
-                response = await axios.patch(`/appointments/${id}`, formData, {
+                response = await axios.patch(`/diagnoses/${id}`, payload, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
             } catch (patchErr) {
                 if (patchErr.response?.status === 404) {
-                    response = await axios.put(`/appointments/${id}`, formData, {
+                    response = await axios.put(`/diagnoses/${id}`, payload, {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
@@ -121,8 +115,8 @@ export default function Edit() {
                     throw patchErr;
                 }
             }
-            toast.success('Appointment updated successfully');
-            navigate('/appointments');
+            toast.success('Diagnosis updated successfully');
+            navigate('/diagnoses');
         } catch (err) {
             console.error("Full error:", err);
             console.error("Error response:", err.response?.data);
@@ -153,58 +147,20 @@ export default function Edit() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        // Validation
         if (!form.patient_id || !form.doctor_id) {
             toast.error('Please select a patient and doctor');
             return;
         }
-        if (!form.appointment_date) {
-            toast.error('Please select an appointment date');
-            return;
-        }
-        if (!form.appointment_time) {
-            toast.error('Please select an appointment time');
-            return;
-        }
-        
-        updateAppointment();
+        updateDiagnosis();
     };
 
-    if (loading) {
-        return (
-            <>
-                <h1 className="text-2xl font-semibold mb-4">Edit Appointment</h1>
-                <div className="space-y-4 max-w-lg">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-10 w-20" />
-                </div>
-            </>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                <h2 className="font-semibold text-red-800">Error loading appointment</h2>
-                <p className="text-red-700 mt-2">{error}</p>
-                <Button 
-                    variant="outline" 
-                    onClick={() => navigate('/appointments')}
-                    className="mt-4"
-                >Back to Appointments</Button>
-            </div>
-        );
-    }
+    if (loading) return <div>Loading diagnosis data...</div>;
 
   return (
     <>
-        <h1 className="text-2xl font-semibold mb-4">Edit Appointment</h1>
-        <form onSubmit={handleSubmit} className="space-y-2 max-w-lg">
+        <h1 className="text-2xl font-semibold mb-4">Edit Diagnosis</h1>
+        <form onSubmit={handleSubmit} className="space-y-2 max-w-2xl">
+            
             <div>
                 <label className="text-sm font-medium">Patient</label>
                 <Select value={form.patient_id} onValueChange={(value) => handleSelectChange('patient_id', value)}>
@@ -220,7 +176,7 @@ export default function Edit() {
                     </SelectContent>
                 </Select>
             </div>
-            
+
             <div>
                 <label className="text-sm font-medium">Doctor</label>
                 <Select value={form.doctor_id} onValueChange={(value) => handleSelectChange('doctor_id', value)}>
@@ -238,46 +194,83 @@ export default function Edit() {
             </div>
 
             <Input 
-                type="date" 
-                placeholder="Appointment date" 
-                name="appointment_date" 
-                value={form.appointment_date} 
-                onChange={handleChange}
-            />
-            <Input 
-                type="time" 
-                placeholder="Appointment time" 
-                name="appointment_time" 
-                value={form.appointment_time} 
-                onChange={handleChange}
-            />
-            <Input 
                 type="text" 
-                placeholder="Reason" 
-                name="reason" 
-                value={form.reason} 
+                placeholder="Condition" 
+                name="condition" 
+                value={form.condition} 
                 onChange={handleChange}
             />
+
+            <textarea 
+                placeholder="Description" 
+                name="description" 
+                value={form.description} 
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                rows="3"
+            />
+
+            <div>
+                <label className="text-sm font-medium">Diagnosis Date</label>
+                <Input 
+                    type="date" 
+                    name="diagnosis_date" 
+                    value={form.diagnosis_date} 
+                    onChange={handleChange}
+                />
+            </div>
+
+            <div>
+                <label className="text-sm font-medium">Severity</label>
+                <Select value={form.severity} onValueChange={(value) => handleSelectChange('severity', value)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select severity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="mild">Mild</SelectItem>
+                        <SelectItem value="moderate">Moderate</SelectItem>
+                        <SelectItem value="severe">Severe</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div>
+                <label className="text-sm font-medium">Status</label>
+                <Select value={form.status} onValueChange={(value) => handleSelectChange('status', value)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
             <textarea 
                 placeholder="Notes" 
                 name="notes" 
                 value={form.notes} 
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
-                rows="3"
+                rows="2"
             />
+
             <div className="flex gap-2">
                 <Button 
                     className="mt-4" 
                     variant="outline" 
                     type="submit" 
                     disabled={submitting}
-                >{submitting ? 'Updating...' : 'Update Appointment'}</Button>
+                >{submitting ? 'Updating...' : 'Update Diagnosis'}</Button>
                 <Button 
                     className="mt-4" 
                     variant="outline" 
                     type="button"
-                    onClick={() => navigate('/appointments')}
+                    onClick={() => navigate('/diagnoses')}
                 >Cancel</Button>
             </div>
         </form>

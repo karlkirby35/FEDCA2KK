@@ -17,16 +17,12 @@ export default function Create() {
     const [form, setForm] = useState({
         patient_id: "",
         doctor_id: "",
-        diagnosis_id: "",
-        medication: "",
-        dosage: "",
-        frequency: "",
-        duration: "",
-        instructions: "",
-        side_effects: "",
-        start_date: "",
-        end_date: "",
+        condition: "",
+        description: "",
+        diagnosis_date: "",
         status: "active",
+        severity: "mild",
+        notes: "",
     });
 
     const [patients, setPatients] = useState([]);
@@ -35,7 +31,6 @@ export default function Create() {
     const navigate = useNavigate();
     const { token } = useAuth();
 
-    // Fetch patients and doctors on load
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -67,32 +62,27 @@ export default function Create() {
         });
     };
 
-    const createPrescription = async () => {
+    const createDiagnosis = async () => {
         setSubmitting(true);
         try {
-            // Convert IDs to numbers and prepare payload
             const payload = {
                 patient_id: parseInt(form.patient_id),
                 doctor_id: parseInt(form.doctor_id),
-                diagnosis_id: parseInt(form.diagnosis_id),
-                medication: form.medication.trim(),
-                dosage: form.dosage.trim(),
-                frequency: form.frequency.trim(),
-                duration: form.duration.trim(),
-                instructions: form.instructions.trim(),
-                side_effects: form.side_effects.trim(),
-                issue_date: form.start_date,
-                expiry_date: form.end_date,
+                condition: form.condition.trim(),
+                description: form.description.trim(),
+                diagnosis_date: form.diagnosis_date,
                 status: form.status,
+                severity: form.severity,
+                notes: form.notes.trim(),
             };
-            console.log('Sending prescription payload:', payload);
-            const response = await axios.post('/prescriptions', payload, {
+            console.log('Sending diagnosis payload:', payload);
+            const response = await axios.post('/diagnoses', payload, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            toast.success('Prescription created successfully');
-            navigate('/prescriptions', { state: { type: 'success', message: 'Prescription created' } });
+            toast.success('Diagnosis created successfully');
+            navigate('/diagnoses', { state: { type: 'success', message: 'Diagnosis created' } });
         } catch (err) {
             console.error('Full error:', err);
             console.error('Error response:', err.response?.data);
@@ -123,7 +113,7 @@ export default function Create() {
             toast.error('Please select a patient and doctor');
             return;
         }
-        createPrescription();
+        createDiagnosis();
     };
 
   return (
@@ -131,12 +121,11 @@ export default function Create() {
         <Button 
             variant="outline" 
             className="mb-4 w-fit"
-            onClick={() => navigate('/prescriptions')}
+            onClick={() => navigate('/diagnoses')}
         >← Back</Button>
-        <h1 className="text-2xl font-semibold mb-4">Create Prescription</h1>
+        <h1 className="text-2xl font-semibold mb-4">Create Diagnosis</h1>
         <form onSubmit={handleSubmit} className="space-y-3 max-w-2xl">
             
-            {/* Patient Select */}
             <div>
                 <label className="text-sm font-medium">Patient</label>
                 <Select value={form.patient_id} onValueChange={(value) => handleSelectChange('patient_id', value)}>
@@ -153,7 +142,6 @@ export default function Create() {
                 </Select>
             </div>
 
-            {/* Doctor Select */}
             <div>
                 <label className="text-sm font-medium">Doctor</label>
                 <Select value={form.doctor_id} onValueChange={(value) => handleSelectChange('doctor_id', value)}>
@@ -170,101 +158,50 @@ export default function Create() {
                 </Select>
             </div>
 
-            {/* Diagnosis ID */}
-            <Input 
-                type="number" 
-                placeholder="Diagnosis ID" 
-                name="diagnosis_id" 
-                value={form.diagnosis_id} 
-                onChange={handleChange}
-                required
-            />
-
-            {/* Medication */}
             <Input 
                 type="text" 
-                placeholder="Medication name" 
-                name="medication" 
-                value={form.medication} 
+                placeholder="Condition (e.g., Diabetes)" 
+                name="condition" 
+                value={form.condition} 
                 onChange={handleChange}
                 required
             />
 
-            {/* Dosage */}
-            <Input 
-                type="text" 
-                placeholder="Dosage (e.g., 500mg)" 
-                name="dosage" 
-                value={form.dosage} 
-                onChange={handleChange}
-                required
-            />
-
-            {/* Frequency */}
-            <Input 
-                type="text" 
-                placeholder="Frequency (e.g., twice daily)" 
-                name="frequency" 
-                value={form.frequency} 
-                onChange={handleChange}
-                required
-            />
-
-            {/* Duration */}
-            <Input 
-                type="text" 
-                placeholder="Duration (e.g., 7 days)" 
-                name="duration" 
-                value={form.duration} 
-                onChange={handleChange}
-                required
-            />
-
-            {/* Instructions */}
             <textarea 
-                placeholder="Instructions (e.g., take with food)" 
-                name="instructions" 
-                value={form.instructions} 
+                placeholder="Description" 
+                name="description" 
+                value={form.description} 
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
-                rows="2"
+                rows="3"
             />
 
-            {/* Side Effects */}
-            <textarea 
-                placeholder="Side effects/warnings" 
-                name="side_effects" 
-                value={form.side_effects} 
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-                rows="2"
-            />
-
-            {/* Issue Date */}
             <div>
-                <label className="text-sm font-medium">Start date</label>
+                <label className="text-sm font-medium">Diagnosis Date</label>
                 <Input 
                     type="date" 
-                    name="start_date" 
-                    value={form.start_date} 
+                    name="diagnosis_date" 
+                    value={form.diagnosis_date} 
                     onChange={handleChange}
                     required
                 />
             </div>
 
-            {/* Expiry Date */}
             <div>
-                <label className="text-sm font-medium">End date</label>
-                <Input 
-                    type="date" 
-                    name="end_date" 
-                    value={form.end_date} 
-                    onChange={handleChange}
-                    required
-                />
+                <label className="text-sm font-medium">Severity</label>
+                <Select value={form.severity} onValueChange={(value) => handleSelectChange('severity', value)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select severity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="mild">Mild</SelectItem>
+                        <SelectItem value="moderate">Moderate</SelectItem>
+                        <SelectItem value="severe">Severe</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
-            {/* Status */}
             <div>
                 <label className="text-sm font-medium">Status</label>
                 <Select value={form.status} onValueChange={(value) => handleSelectChange('status', value)}>
@@ -273,20 +210,28 @@ export default function Create() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
                         <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
+
+            <textarea 
+                placeholder="Notes" 
+                name="notes" 
+                value={form.notes} 
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                rows="2"
+            />
 
             <Button 
                 className="mt-6" 
                 variant="outline" 
                 type="submit" 
                 disabled={submitting}
-            >{submitting ? 'Creating...' : 'Create Prescription'}</Button>
+            >{submitting ? 'Creating...' : 'Create Diagnosis'}</Button>
         </form>
     </>
   );

@@ -84,7 +84,7 @@ export default function AppointmentsIndex() {
         </TableHeader>
         <TableBody>
           {appointments.map((appointment) => {
-            // Convert timestamp to date string
+          
             let appointmentDate = 'N/A';
             if (appointment.appointment_date) {
               let timestamp = parseInt(appointment.appointment_date);

@@ -12,8 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function PrescriptionShow() {
-  const [prescription, setPrescription] = useState(null);
+export default function DiagnosisShow() {
+  const [diagnosis, setDiagnosis] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
@@ -32,22 +32,21 @@ export default function PrescriptionShow() {
   };
 
   useEffect(() => {
-    const fetchPrescription = async () => {
+    const fetchDiagnosis = async () => {
       try {
-        const response = await axios.get(`/prescriptions/${id}`, {
+        const response = await axios.get(`/diagnoses/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
         
-        // Fetch patient and doctor data
-        let prescriptionData = response.data;
+        let diagnosisData = response.data;
         try {
           const [patientRes, doctorRes] = await Promise.all([
             axios.get(`/patients/${response.data.patient_id}`, { headers: { Authorization: `Bearer ${token}` }}),
             axios.get(`/doctors/${response.data.doctor_id}`, { headers: { Authorization: `Bearer ${token}` }})
           ]);
-          prescriptionData = {
+          diagnosisData = {
             ...response.data,
             patient: patientRes.data,
             doctor: doctorRes.data
@@ -56,7 +55,7 @@ export default function PrescriptionShow() {
           console.error('Error fetching patient/doctor:', err);
         }
         
-        setPrescription(prescriptionData);
+        setDiagnosis(diagnosisData);
       } catch (err) {
         console.error(err);
         setError(err.message);
@@ -65,28 +64,25 @@ export default function PrescriptionShow() {
       }
     };
 
-    fetchPrescription();
+    fetchDiagnosis();
   }, [id, token]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!prescription) return <div>No prescription found</div>;
-
-  const startDate = prescription.issue_date || prescription.start_date;
-  const endDate = prescription.expiry_date || prescription.end_date;
+  if (!diagnosis) return <div>No diagnosis found</div>;
 
   return (
     <>
       <Button 
           variant="outline"
-          onClick={() => navigate('/prescriptions')}
+          onClick={() => navigate('/diagnoses')}
           className="w-fit mb-4"
         >← Back</Button>
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle>Prescription #{prescription.id}</CardTitle>
+          <CardTitle>Diagnosis #{diagnosis.id}</CardTitle>
           <CardDescription>
-            Diagnosis ID: {prescription.diagnosis_id}
+            Condition: {diagnosis.condition}
           </CardDescription>
         </CardHeader>
       <CardContent>
@@ -94,74 +90,56 @@ export default function PrescriptionShow() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-600">Patient</p>
-              <p>{prescription.patient?.first_name} {prescription.patient?.last_name}</p>
+              <p>{diagnosis.patient?.first_name} {diagnosis.patient?.last_name}</p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Doctor</p>
-              <p>{prescription.doctor?.first_name} {prescription.doctor?.last_name}</p>
+              <p>{diagnosis.doctor?.first_name} {diagnosis.doctor?.last_name}</p>
             </div>
             <div className="col-span-2">
-              <p className="text-sm font-medium text-gray-600">Medication</p>
-              <p>{prescription.medication || prescription.medication_name || 'N/A'}</p>
+              <p className="text-sm font-medium text-gray-600">Condition</p>
+              <p>{diagnosis.condition || 'N/A'}</p>
             </div>
-            {prescription.dosage && (
-              <div>
-                <p className="text-sm font-medium text-gray-600">Dosage</p>
-                <p>{prescription.dosage}</p>
+            {diagnosis.description && (
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-gray-600">Description</p>
+                <p>{diagnosis.description}</p>
               </div>
             )}
-            {prescription.frequency && (
+            {diagnosis.diagnosis_date && (
               <div>
-                <p className="text-sm font-medium text-gray-600">Frequency</p>
-                <p>{prescription.frequency}</p>
+                <p className="text-sm font-medium text-gray-600">Diagnosis Date</p>
+                <p>{formatDate(diagnosis.diagnosis_date)}</p>
               </div>
             )}
-            {prescription.duration && (
-              <div>
-                <p className="text-sm font-medium text-gray-600">Duration</p>
-                <p>{prescription.duration}</p>
-              </div>
-            )}
-            {startDate && (
-              <div>
-                <p className="text-sm font-medium text-gray-600">Start Date</p>
-                <p>{formatDate(startDate)}</p>
-              </div>
-            )}
-            {endDate && (
-              <div>
-                <p className="text-sm font-medium text-gray-600">End Date</p>
-                <p>{formatDate(endDate)}</p>
-              </div>
-            )}
-            {prescription.status && (
+            {diagnosis.status && (
               <div>
                 <p className="text-sm font-medium text-gray-600">Status</p>
-                <p>{prescription.status}</p>
+                <p>{diagnosis.status}</p>
+              </div>
+            )}
+            {diagnosis.severity && (
+              <div>
+                <p className="text-sm font-medium text-gray-600">Severity</p>
+                <p>{diagnosis.severity}</p>
+              </div>
+            )}
+            {diagnosis.notes && (
+              <div className="col-span-2">
+                <p className="text-sm font-medium text-gray-600">Notes</p>
+                <p>{diagnosis.notes}</p>
               </div>
             )}
           </div>
-          {prescription.instructions && (
-            <div>
-              <p className="text-sm font-medium text-gray-600">Instructions</p>
-              <p>{prescription.instructions}</p>
-            </div>
-          )}
-          {prescription.side_effects && (
-            <div>
-              <p className="text-sm font-medium text-gray-600">Side Effects/Warnings</p>
-              <p>{prescription.side_effects}</p>
-            </div>
-          )}
         </div>
       </CardContent>
         <CardFooter className="flex-col gap-2">
           <Button 
             variant="default"
-            onClick={() => navigate(`/prescriptions/${prescription.id}/edit`)}
+            onClick={() => navigate(`/diagnoses/${diagnosis.id}/edit`)}
             className="w-full"
           >
-            Edit Prescription
+            Edit Diagnosis
           </Button>
         </CardFooter>
       </Card>

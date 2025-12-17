@@ -69,9 +69,9 @@ export default function RegisterForm() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="register-email">Email</Label>
               <Input
-                id="email"
+                id="register-email"
                 name="email"
                 type="email"
                 placeholder="m@example.com"
@@ -80,9 +80,9 @@ export default function RegisterForm() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="register-password">Password</Label>
               <Input
-                id="password"
+                id="register-password"
                 name="password"
                 type="password"
                 required

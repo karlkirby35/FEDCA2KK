@@ -104,8 +104,8 @@ export default function Edit() {
                 duration: form.duration.trim(),
                 instructions: form.instructions.trim(),
                 side_effects: form.side_effects.trim(),
-                start_date: form.start_date,
-                end_date: form.end_date,
+                issue_date: form.start_date,
+                expiry_date: form.end_date,
                 status: form.status,
             };
             

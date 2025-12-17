@@ -42,9 +42,9 @@ export default function LoginForm() {
         <form onSubmit={submitForm}>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="login-email">Email</Label>
               <Input
-                id="email"
+                id="login-email"
                 name="email"
                 type="email"
                 placeholder="m@example.com"
@@ -54,10 +54,10 @@ export default function LoginForm() {
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="login-password">Password</Label>
               </div>
               <Input
-                id="password"
+                id="login-password"
                 name="password"
                 type="password"
                 required
